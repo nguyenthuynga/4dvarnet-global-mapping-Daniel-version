@@ -16,6 +16,7 @@ TrainingItemwithLonLat = namedtuple(
 )
 
 
+
 class DistinctNormDataModulewInputTracks(BaseDataModule):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -828,6 +829,8 @@ def cosanneal_lr_adam_base(lit_mod, lr, T_max=100, weight_decay=0.0):
         ],
         weight_decay=weight_decay,
     )
+
+    print("T_max:", T_max, "lr:", lr)
     return {
         "optimizer": opt,
         "lr_scheduler": torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=T_max),

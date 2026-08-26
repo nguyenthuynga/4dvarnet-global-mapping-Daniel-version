@@ -1,18 +1,233 @@
+######################## Changes ########################
+#-checkpoint path + config path  +name (config ideally from ./outputs/<your_model>/.hydra/config.yaml)
+#-might need to replace "=" in weight by "_"
+
+#-input_data: path to real altimetry data (/Odyssey/public/data_challenge_ssh_ose/data/gridded_alongtrack/sla_filtered_0.25deg.nc)
+#########################################################
+
+dims:
+  # patch: 15-720-1440
+  # # # patch: 30-720-1440 # for time window=30
+  # stride: 1-208-232
+
+  patch: 15-512-512 #For 4DVarNet56M and UNet3DTransformer
+  # patch: 30-512-512 #For 4DVarNet56M and UNet3DTransformer time windows=30
+  stride: 1-208-232
+
+
+  res: .25
+
 method:
   # -------------------------------------------------------------------
   # SLA
   # -------------------------------------------------------------------
-  name: fdvarnet-glo12-sla
-  checkpoint: <chemin_vers_checkpoints>
-  config: ../config/xp/inference-glo12-sla.yaml
 
-  input_data: data/global_sla_0.25.nc
-  input_var: sla_filtered
+  # name: FDVarNet3D18M_bs2_real_random_7nadirNSwot_train20232025withoutAlg # remeber to change patch and stride because of memory error
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-14/FDVarNet3D_18M_Lit4dVarNetRealSparse_bs2_real_random_7nadirNSwot_train20232025withoutAlg-12-23-38_/FDVarNet_3D-real-random_train20232025woAlg/checkpoints/val_mse1p95882-epoch608.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-14/FDVarNet3D_18M_Lit4dVarNetRealSparse_bs2_real_random_7nadirNSwot_train20232025withoutAlg-12-23-38_/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+
+  # name: FDVarNet3D18M_bs2_7nadirNSwot_osse_random_pretrain_GAPFREEtarget # remeber to change patch and stride because of memory error
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-05/osse_random_pretrain_FDVarNet3D18M_GAPFREEtarget_bs2-16-29-11/FDVarNet_3D-osse-random_GAPFREEtarget/checkpoints/val_mse0p75185-epoch512.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-05/osse_random_pretrain_FDVarNet3D18M_GAPFREEtarget_bs2-16-29-11/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+  # name: FDVarNet_bs2_real_random_7nadirNSwot_train20232025withoutAlg # remeber to change patch and stride because of memory error
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-13/FDVarNet2D56M_Lit4dVarNetRealSparse_bs2_real_random_7nadirNSwot_train20232025withoutAlg-21-53-55/FDVarNet-real-random_train20232025woAlg/checkpoints/val_msep2p21875-epoch344.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-13/FDVarNet2D56M_Lit4dVarNetRealSparse_bs2_real_random_7nadirNSwot_train20232025withoutAlg-21-53-55/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+  # name: FDVarNet_bs2_7nadirNSwot_osse_random_pretrain_GAPFREEtarget # remeber to change patch and stride because of memory error
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-22/osse_random_pretrain_FDVarNet_GAPFREEtarget_bs2-17-09-17/FDVarNet-osse-random_GAPFREEtarget/checkpoints/val_mse0p96920-epoch350.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-22/osse_random_pretrain_FDVarNet_GAPFREEtarget_bs2-17-09-17/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+  # name: UNet3DTransformer_bs8_7nadirNSwot_osse_random_pretrain_GAPPYtarget # remeber to change patch and stride because of memory error
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-20/osse_random_pretrain_UNet3DTransformerGAPPYtarget_bs8-16-18-10/unet-osse-random-UNet3DTransformer/checkpoints/val_mse0p39494-epoch374.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-20/osse_random_pretrain_UNet3DTransformerGAPPYtarget_bs8-16-18-10/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+
+  # name: UNet3DTransformer_bs8_7nadirNSwot_osse_random_pretrain_GAPFREEtarget # remeber to change patch and stride because of memory error
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-22/osse_random_pretrain_UNet3DTransformer_bs8-16-38-58/unet-osse-random-UNet3DTransformer_GAPFREEtarget/checkpoints/val_mse0p77394-epoch644.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-22/osse_random_pretrain_UNet3DTransformer_bs8-16-38-58/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+  # name: UNet3DTransformer_bs8_real_random_7nadirNSwot_train20232025withoutAlg_time30 # remeber to change patch and stride because of memory error
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-24/UNet3DTransformer_bs4_real_random_train20232025withoutAlg_Time30-09-03-07/UNet3DTransformer-real-random_train20232025woAlg_Time30/checkpoints/val_mse2p04288-epoch617.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-24/UNet3DTransformer_bs4_real_random_train20232025withoutAlg_Time30-09-03-07/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+  # name: osse_random_number_of_nadirs_GAPPYtarget_UNet # remeber to change patch and stride because of memory error
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-08/osse_random_pretrain-12-30-13/unet-osse-random/checkpoints/val_mse_061723-epoch_512.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-08/osse_random_pretrain-12-30-13/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+  # name: UNet3DTransformer_bs8_real_random_7nadirNSwot_train20232025withoutAlg # remeber to change patch and stride because of memory error
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-18/UNet3DTransformer_bs8_real_random_7nadirNSwot_train20232025withoutAlg-16-55-02_/UNet3DTransformer-real-random_train20232025woAlg/checkpoints/val_mse_2.45946-epoch_410.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-18/UNet3DTransformer_bs8_real_random_7nadirNSwot_train20232025withoutAlg-16-55-02_/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+  # name: Real_random_7nadirNSwot_train20232025withoutAlg_Inputsize512 # remeber to change patch 15 to 30 for time window
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-17/real_random_7nadirNSwot_train20232025withoutAlg_Inputsize512_batchsize8-10-05-27/unet-real-random_train20232025woAlg_latlon512input/checkpoints/val_mse_2.61924-epoch_320.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-17/real_random_7nadirNSwot_train20232025withoutAlg_Inputsize512_batchsize8-10-05-27/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+
+  # name: PartialUNet_real_random_7nadirNSwot_train20232025withoutAlg # remeber to change patch 15 to 30 for time window
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-17/PartialUNet_real_random_7nadirNSwot_train20232025withoutAlg-12-13-43/PartialUnet-real-random_train20232025woAlg/checkpoints/val_mse_3.18226-epoch_425.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-17/PartialUNet_real_random_7nadirNSwot_train20232025withoutAlg-12-13-43/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+
+  # name: FinetuneOSE_fromOSEEGapFREEPretrained_7nadirsWithSwot20232025WithoutAlg # remeber to change patch 15 to 30 for time window
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-16/FinetuneOSE_fromOSEEGapFREEPretrained_7nadirsWithSwot20232025WithoutAlg-11-23-26_/unet-real-random_finetunefromOSSEGapFREEpretrained/checkpoints/val_mse_2p65728-epoch_323.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-16/FinetuneOSE_fromOSEEGapFREEPretrained_7nadirsWithSwot20232025WithoutAlg-11-23-26_/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+  # name: Train_real_random_7nadirNSwot_train20232025withoutAlg_Time30 # remeber to change patch 15 to 30 for time window
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-13/real_random_7nadirNSwot_train20232025withoutAlg_TimeWindow30-14-26-58/unet-real-random_train20232025woAlg_Time30/checkpoints/val_mse_2p40253_epoch_311copy.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-13/real_random_7nadirNSwot_train20232025withoutAlg_TimeWindow30-14-26-58/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+
+  # name: FinetuneOSE_fromOSEEGapFREEPretrained_8nadirsWithSwot2023_w_grad_mse1000_noise0003_ep164
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-13/FinetuneOSE_fromOSEEGapFREEPretrained_8nadirsWithSwot2023_w_grad_mse1000_noise0003-14-20-50/unet-real-random_finetunefromOSSEGapFREEpretrained/checkpoints/val_mse_2p84137-epoch_164.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-13/FinetuneOSE_fromOSEEGapFREEPretrained_8nadirsWithSwot2023_w_grad_mse1000_noise0003-14-20-50/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+  
+
+  # name: Train_real_random_7nadirNSwot_train20232025withoutAlg
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-04/real_random_7nadirNSwot_train20232025withoutAlg-19-22-46/unet-real-random_train20232025woAlg/checkpoints/val_mse_2p48893-epoch362.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-04/real_random_7nadirNSwot_train20232025withoutAlg-19-22-46/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+
+  # name: fdvarnet-glo12-sla--4DVarNet56M-Train6Nadirs_Test7Nadirs
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-30/Fdvarnet_6nadirs_OSSE-11-28-16/fdvarnet-unetunrolling-masked/checkpoints/val_mse_091198-epoch_302.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-30/Fdvarnet_6nadirs_OSSE-11-28-16/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_only7nadirs_real_2023-01-01_2025-07-31.nc" #for 2024
+
+
+  # name: Train_real_random_8nadirsWithSwot_w_grad_mse1000_noise0003_Max6TracksAvoidOverfit
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-26/real_random_8nadirsWithSwot_w_grad_mse1000_noise0003_Max6TracksAvoidOverfit-18-35-07/unet-real-random/checkpoints/val_mse_2.99752-epoch_359.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-26/real_random_8nadirsWithSwot_w_grad_mse1000_noise0003_Max6TracksAvoidOverfit-18-35-07/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+
+
+  # name: Train_real_random_8nadirsWithSwot_Test7NadirsNSwot_unet_1SampleNoNoise_ckptep278
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-25/real_random_8nadirsWithSwot-23-01-26/unet-real-random/checkpoints/val_mse_2.03874-epoch_278.ckpt"
+  # # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-25/real_random_8nadirsWithSwot-23-01-26/unet-real-random/checkpoints/val_mse_2.11138-epoch_137.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-25/real_random_8nadirsWithSwot-23-01-26/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc"
+  # ensemble_size: 1
+  # ensemble_noise: 0.0
+  
+  # name: Train_real_random_8nadirsNoSwot_Test7Nadirs_unet_1SampleNoNoise
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-25/real_random_8nadirsNoSwot-18-18-34/unet-real-random/checkpoints/val_mse_1.51027-epoch_173.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-25/real_random_8nadirsNoSwot-18-18-34/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_only7nadirs_real_2023-01-01_2025-07-31.nc" #for 2024
+  # ensemble_size: 1
+  # ensemble_noise: 0.0
+
+
+  
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-14/osse_random_pretrain_UNet2D_GAPFREEtarget_bs16-12-28-15/unet-osse-random-UNet2D_GAPFREEtarget/checkpoints/val_mse1p07304-epoch578.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-14/osse_random_pretrain_UNet2D_GAPFREEtarget_bs16-12-28-15/.hydra/config.yaml"
+  # name: Unet2D_Train-osse-random-number-nadirs_Test7nadirsNSWOT
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc" 
+  # name: Unet2D_Train-osse-random-number-nadirs_Test6nadirs
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025_combinednadirs/alongtrack_only6nadirs_real_2023-01-01_2025-07-31.nc" 
+  # name: Unet2D_Train-osse-random-number-nadirs_Test2nadirs
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025_combinednadirs/alongtrack_only2nadirss3aNs6a_real_2023-01-01_2025-07-31.nc"
+
+
+  # name: fdvarnet-glo12-sla--unet-Train6Nadirs_Test7Nadirs
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-12/Only6Nadirs2024-18-33-06/unet-masked/checkpoints/val_mse_096402_epoch_521.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-12/Only6Nadirs2024-18-33-06/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_only7nadirs_real_2023-01-01_2025-07-31.nc" #for 2024
+
+
+
+  # name: fdvarnet-glo12-sla--unet-Train6NadirsNSWOT_Test7NadirsNSWOTLweRemoved
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-15/SWOTN6Nadirs2024-16-34-21/unet-masked/checkpoints/val_mse_075449_epoch_491.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-15/SWOTN6Nadirs2024-16-34-21/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc" #for 2024
+
+
+  # name: fdvarnet-glo12-sla--unet-Train2Nadirs_Test2Nadirs
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-18/Only2nadirs_s3aNs6a2024-21-17-16/unet-masked/checkpoints/val_mse_1p86143_epoch_419.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-18/Only2nadirs_s3aNs6a2024-21-17-16/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/preprocessed_nga/mapping_2023_2025/alongtrack_only2nadirss3aNs6a_real_2023-01-01_2025-07-31.nc" #for 2024
+
+
+  # name: fdvarnet-glo12-sla--unet-Train6Nadirs_Test2Nadirs
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-12/Only6Nadirs2024-18-33-06/unet-masked/checkpoints/val_mse_096402_epoch_521.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-12/Only6Nadirs2024-18-33-06/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/preprocessed_nga/mapping_2023_2025/alongtrack_only2nadirss3aNs6a_real_2023-01-01_2025-07-31.nc" #for 2024
+
+
+  # name: fdvarnet-glo12-sla--unet-SwotN6nadirs
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-15/SWOTN6Nadirs2024-16-34-21/unet-masked/checkpoints/val_mse_075449_epoch_491.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-15/SWOTN6Nadirs2024-16-34-21/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2024/alongtrack_nadirsNswot_real_2023-12-01_2025-01-31.nc" #for 2024
+
+
+  # name: fdvarnet-glo12-sla--unet-only6nadirs
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-12/Only6Nadirs2024-18-33-06/unet-masked/checkpoints/val_mse_096402_epoch_521.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-12/Only6Nadirs2024-18-33-06/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2024/alongtrack_onlynadirs_real_2023-12-01_2025-01-31.nc" #for 2024
+
+
+  ################################### OSSE Inference ###############################################################
+  input_data: "/SCRATCH/n23nguye/mapping_2023_2025/osse_with_ose_footprint/Glorys12_alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31_with_Altika.nc"
+  
+  name: FDVarNet3D18M_bs2_real_random_7nadirNSwot_train20232025withoutAlg_OSSEinference # remeber to change patch and stride because of memory error
+  checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-14/FDVarNet3D_18M_Lit4dVarNetRealSparse_bs2_real_random_7nadirNSwot_train20232025withoutAlg-12-23-38_/FDVarNet_3D-real-random_train20232025woAlg/checkpoints/val_mse1p95882-epoch608.ckpt"
+  config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-14/FDVarNet3D_18M_Lit4dVarNetRealSparse_bs2_real_random_7nadirNSwot_train20232025withoutAlg-12-23-38_/.hydra/config.yaml"
+  
+
+  # name: FDVarNet_bs2_real_random_7nadirNSwot_train20232025withoutAlg_OSSEinference # remeber to change patch and stride because of memory error
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-13/FDVarNet2D56M_Lit4dVarNetRealSparse_bs2_real_random_7nadirNSwot_train20232025withoutAlg-21-53-55/FDVarNet-real-random_train20232025woAlg/checkpoints/val_msep2p21875-epoch344.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-13/FDVarNet2D56M_Lit4dVarNetRealSparse_bs2_real_random_7nadirNSwot_train20232025withoutAlg-21-53-55/.hydra/config.yaml"
+  
+  
+  # name: FDVarNet_bs2_7nadirNSwot_osse_random_pretrain_GAPFREEtarget_OSSEinference # remeber to change patch and stride because of memory error
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-22/osse_random_pretrain_FDVarNet_GAPFREEtarget_bs2-17-09-17/FDVarNet-osse-random_GAPFREEtarget/checkpoints/val_mse0p96920-epoch350.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-22/osse_random_pretrain_FDVarNet_GAPFREEtarget_bs2-17-09-17/.hydra/config.yaml"
+  
+
+  # name: FDVarNet3D18M_bs2_7nadirNSwot_osse_random_pretrain_GAPFREEtarget_OSSEinference # remeber to change patch and stride because of memory error
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-05/osse_random_pretrain_FDVarNet3D18M_GAPFREEtarget_bs2-16-29-11/FDVarNet_3D-osse-random_GAPFREEtarget/checkpoints/val_mse0p75185-epoch512.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-05/osse_random_pretrain_FDVarNet3D18M_GAPFREEtarget_bs2-16-29-11/.hydra/config.yaml"
+  
+
+  # name: UNet3DTransformer_bs8_real_random_7nadirNSwot_train20232025withoutAlg_OSSEinference # remeber to change patch and stride because of memory error
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-18/UNet3DTransformer_bs8_real_random_7nadirNSwot_train20232025withoutAlg-16-55-02_/UNet3DTransformer-real-random_train20232025woAlg/checkpoints/val_mse_2.45946-epoch_410.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-18/UNet3DTransformer_bs8_real_random_7nadirNSwot_train20232025withoutAlg-16-55-02_/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/osse_with_ose_footprint/Glorys12_alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31_with_Altika.nc"
+
+  # name: UNet3DTransformer_bs8_7nadirNSwot_osse_random_pretrain_GAPFREEtarget_OSSEinference # remeber to change patch and stride because of memory error
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-22/osse_random_pretrain_UNet3DTransformer_bs8-16-38-58/unet-osse-random-UNet3DTransformer_GAPFREEtarget/checkpoints/val_mse0p77394-epoch644.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-22/osse_random_pretrain_UNet3DTransformer_bs8-16-38-58/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/osse_with_ose_footprint/Glorys12_alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31_with_Altika.nc"
+
+  # name: Train_real_random_7nadirNSwot_train20232025withoutAlg_UNet2D_OSSEInference
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-04/real_random_7nadirNSwot_train20232025withoutAlg-19-22-46/unet-real-random_train20232025woAlg/checkpoints/val_mse_2p48893-epoch362.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-07-04/real_random_7nadirNSwot_train20232025withoutAlg-19-22-46/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/osse_with_ose_footprint/Glorys12_alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31_with_Altika.nc"
+
+
+  # name: Unet-Train6NadirsNSWOT_test7NadirsNSWOTLweRemoved_OSSEinference
+  # checkpoint: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-15/SWOTN6Nadirs2024-16-34-21/unet-masked/checkpoints/val_mse_075449_epoch_491.ckpt"
+  # config: "/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-15/SWOTN6Nadirs2024-16-34-21/.hydra/config.yaml"
+  # input_data: "/SCRATCH/n23nguye/mapping_2023_2025/osse_with_ose_footprint/Glorys12_alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31_with_Altika.nc" #for 2024
+  ###########################################"OSSE inference"#########################################################
+
+  input_var: sla # variable name in my new 2024 file (unfiltered content)
   output_var: sla
   ensemble_size: 10
   ensemble_noise: .2
 
-dims:
-  patch: 15-648-1488
-  stride: 1-200-200
-  res: .25
+

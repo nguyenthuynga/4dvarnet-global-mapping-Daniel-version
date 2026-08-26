@@ -25,7 +25,6 @@ class NormParamsNotProvided(Exception):
 # Data
 # ----
 
-
 class DistinctNormDataModule(BaseDataModule):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -96,6 +95,21 @@ class LazyXrDataset(torch.utils.data.Dataset):
         self.return_coords = False
         self.postpro_fn = postpro_fn
         self.ds = ds.sel(**(domain_limits or {}))
+        
+        #Nga added this:
+        self.mask = kwargs.get("mask")
+        if self.mask is not None and domain_limits is not None:
+            spatial_limits = {
+                k: v for k, v in domain_limits.items()
+                if k in self.mask.dims and k != "time"
+            }
+            self.mask = self.mask.sel(**spatial_limits)
+            
+        #Nga comment out this:
+        # self.mask = kwargs.get("mask")
+        
+        
+        
         self.patch_dims = patch_dims
         self.strides = strides or {}
         _dims = ("variable",) + tuple(k for k in self.ds.dims)
@@ -130,7 +144,7 @@ class LazyXrDataset(torch.utils.data.Dataset):
         self._rng = np.random.default_rng()
         self.noise = noise
         self.noise_type = noise_type
-        self.mask = kwargs.get("mask")
+        
 
     def __len__(self):
         size = 1
@@ -230,6 +244,18 @@ class LazyXrDataset(torch.utils.data.Dataset):
                 )
 
             _mask = _mask.values
+            
+            # print('nga add this: ******************************************')
+            # print("sl:", sl)
+            # print("sl_mask:", sl_mask)
+            # print("offset_lat:", offset_lat)
+            # print("_ds sizes:", _ds.sizes)
+            # print("ds shape:", self.ds.shape)
+            # print("mask shape:", self.mask.shape)
+            # print("ds dims:", self.ds.dims)
+            # print("mask dims:", self.mask.dims)
+            
+            
             item = (
                 _ds.to_dataset(name="tgt")
                 .assign(input=_ds.where(_mask))
@@ -391,19 +417,32 @@ def load_glorys12_data_on_fly_inp(
         rename['longitude'] = 'lon'
     tgt = tgt.rename(rename)[tgt_var]
 
-    inp = (
-        xr.open_dataset(inp_path)
-        .isel(isel)
-    )
+    # inp = (
+    #     xr.open_dataset(inp_path)
+    #     .isel(isel)
+    # )
+    # rename = dict()
+    # if 'latitude' in inp:
+    #     rename['latitude'] = 'lat'
+    # if 'longitude' in inp:
+    #     rename['longitude'] = 'lon'
+    # inp = inp.rename(rename)[inp_var]
+    # return tgt, inp
 
+    #Nga add this for mask
+    mask = xr.open_dataset(inp_path).isel(isel)
+    
     rename = dict()
-    if 'latitude' in inp:
-        rename['latitude'] = 'lat'
-    if 'longitude' in inp:
-        rename['longitude'] = 'lon'
-    inp = inp.rename(rename)[inp_var]
+    if "latitude" in mask.dims:
+        rename["latitude"] = "lat"
+    if "longitude" in mask.dims:
+        rename["longitude"] = "lon"
+    mask = mask.rename(rename)[inp_var]
 
-    return tgt, inp
+    mask = np.isfinite(mask) 
+
+    print('mask mean:', float(np.isfinite(mask).mean()))
+    return tgt, mask
 
 
 def train(trainer, dm, lit_mod, ckpt=None):
@@ -415,3 +454,49 @@ def train(trainer, dm, lit_mod, ckpt=None):
     start = time.time()
     trainer.fit(lit_mod, datamodule=dm, ckpt_path=ckpt)
     print(f"Durée d'apprentissage : {time.time() - start:.3} s")
+
+#################" Nga copied from Paul's setting , see https://github.com/CIA-Oceanix/4dvarnet-global-mapping/blob/paul_dev/contrib/glorys12/__init__.py #################
+from omegaconf import OmegaConf
+from pathlib import Path
+import hydra
+def load_from_cfg(cfg_path, key):
+    """
+    Load configurations from a specified file and instantiate the
+    desired node.
+    """
+    cfg = OmegaConf.load(Path(cfg_path))
+    node = OmegaConf.select(cfg, key)
+    return hydra.utils.call(node)
+
+def train_from_pretrained_model(trainer, dm, lit_mod, config_path,ckpt_path=None):
+    if trainer.logger is not None:
+        print()
+        print("Logdir:", trainer.logger.log_dir)
+        print()
+
+    start = time.time()
+    
+    #print(" Parameter configurations for lit_mod")
+    #print(lit_mod.hparams)
+
+
+    if ckpt_path is not None:
+        print(" Load pretrained config and model from : ", ckpt_path)
+        #lit_mod = lit_mod.load_from_checkpoint(ckpt_path)
+
+        solver = load_from_cfg(config_path, key="model")
+        ckpt = torch.load(ckpt_path, weights_only=True)
+        solver.load_state_dict(ckpt["state_dict"])
+        lit_mod.solver.load_state_dict(solver.solver.state_dict())
+    else:
+        print(" Training from scratch (no pretrained model)", flush=True)
+
+
+    print("lit_mod.hparams:", lit_mod.hparams)
+
+    trainer.fit(lit_mod, datamodule=dm)
+
+
+    print(f"Durée d'apprentissage : {time.time() - start:.3} s")
+    
+#########################################################################

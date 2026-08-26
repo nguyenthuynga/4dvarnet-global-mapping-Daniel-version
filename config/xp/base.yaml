@@ -1,5 +1,13 @@
 # @package _global_
+##################  Changes ####################
+#-change tgt_path and inpt to n23nguye
+#- add Nga1stTrial as xpname
+# -max epoch=1 just to test 
+#-couldn't runls -lh /SCRATCH/n23nguye on vs code therefore couldn't run python main.py xp=unet on VS code, but run ok on http://localhost:8890/
+#-
+#-
 
+################################################
 hydra:
   run:
     dir: outputs/${now:%Y-%m-%d}/${xpname}-${now:%H-%M-%S}
@@ -9,7 +17,7 @@ hydra:
 
 domain: ???
 ckpt: null
-xpname: ???
+xpname: Nga1stTrial
 
 trainer:
   _target_: pytorch_lightning.Trainer
@@ -34,13 +42,14 @@ trainer:
     filename: '{val_mse:.5f}-{epoch:03d}'
   check_val_every_n_epoch: 3
 
+
 datamodule:
   _target_: contrib.glorys12.unet.DistinctNormDataModulewInputTracks
   input_da:
     _target_: contrib.glorys12.load_glorys12_data_on_fly_inp
-    tgt_path: /SCRATCH/d22zhu/glorys12_2010_2019_daily_sla_4th_target_gridded_alongtrack.nc
+    tgt_path: /SCRATCH/n23nguye/glorys12_2010_2019_daily_sla_4th_target_gridded_alongtrack.nc
     tgt_var: sla
-    inp_path: /SCRATCH/d22zhu/glorys12_2010_2019_daily_sla_4th_input_gridded_alongtrack.nc
+    inp_path: /SCRATCH/n23nguye/glorys12_2010_2019_daily_sla_4th_input_gridded_alongtrack.nc
     inp_var: sla
   domains:
     train:

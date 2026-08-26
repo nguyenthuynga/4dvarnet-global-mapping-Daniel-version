@@ -1,18 +1,26 @@
 # @package _global_
 
+########## Need to change 1,xpname and 2,inp_path in case switch from 6nadirs to SWOTplus6Nadirs ################"
+
 domain: ???
 ckpt: null
-xpname: ???
+xpname: Only2nadirs_s3aNs6a2024
 
 
-datamodule:
+
+
+datamodule: #Nga code for 2024
   _target_: contrib.glorys12.DistinctNormDataModule
   input_da:
     _target_: contrib.glorys12.load_glorys12_data_on_fly_inp
-    tgt_path: /SCRATCH/d22zhu/mask/glorys12_2010_2019_daily_sla_4th.nc
+    tgt_path: /SCRATCH/n23nguye/glorys12_2010_2019_daily_sla_4th_target_gridded_alongtrack.nc
     tgt_var: sla
-    inp_path: /SCRATCH/d22zhu/mask/mask_6nadirs_4th.nc
-    inp_var: inp
+    # inp_path: /SCRATCH/n23nguye/glorys12_2010_2019_daily_sla_4th_input_gridded_alongtrack.nc
+    # inp_var: sla
+    # inp_path: /SCRATCH/n23nguye/mapping_2024/mask_onlynadirs_2024_365d.nc # ONLY 6nadirs mask_onlynadirs_2024_365d.nc
+    # inp_path: /SCRATCH/n23nguye/mapping_2024/mask_nadirsNswot_2024_365d.nc # SWOT+6nadirs
+    inp_path: /SCRATCH/n23nguye/mapping_2023_2025/mask_only2nadirss3aNs6a_2024_365d.nc # SWOT+6nadirs
+    inp_var: mask          # <-- Nga mask's variable name (Daniel's is 'inp')
   xrds_kw:
     train:
       patch_dims: {time: 15, lat: 256, lon: 256}
@@ -32,3 +40,13 @@ datamodule:
 defaults:
   - unet
   - _self_
+
+
+# datamodule: #Daniel original code for 2019
+#   _target_: contrib.glorys12.DistinctNormDataModule
+#   input_da:
+#     _target_: contrib.glorys12.load_glorys12_data_on_fly_inp
+    # tgt_path: /SCRATCH/d22zhu/mask/glorys12_2010_2019_daily_sla_4th.nc
+    # tgt_var: sla
+    # inp_path: /SCRATCH/d22zhu/mask/mask_6nadirs_4th.nc
+    # inp_var: inp

@@ -1,0 +1,95 @@
+# @package _global_
+
+#add pretrained weight, pretrain config in entrypoints, then change #epochs in finetuning phase and learning rate 1e-5
+domain: ???
+ckpt: /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-15/SWOTN6Nadirs2024-16-34-21/unet-masked/checkpoints/val_mse_075449_epoch_491.ckpt
+xpname: FinetuneOSE_fromOSEEGapFREEPretrained_7nadirsWithSwot20232025WithoutAlg
+
+trainer:
+  _target_: pytorch_lightning.Trainer
+  inference_mode: false
+  deterministic: true
+  gradient_clip_val: 0.5
+  accelerator: gpu
+  devices: 1
+  logger:
+    _target_: pytorch_lightning.loggers.tensorboard.TensorBoardLogger
+    save_dir: ${hydra:runtime.output_dir}
+    name: ${hydra:runtime.choices.xp}
+    version: ''
+  max_epochs: 500
+  limit_train_batches: 250
+  callbacks:
+  - _target_: pytorch_lightning.callbacks.LearningRateMonitor
+  - _target_: pytorch_lightning.callbacks.ModelCheckpoint
+    monitor: val_mse
+    save_last: true
+    save_top_k: 3
+    filename: '{val_mse:.5f}-{epoch:03d}'
+  check_val_every_n_epoch: 3
+
+datamodule:
+  _target_: contrib.glorys12.real_random.RealRandomDataModule
+  k_min: 2
+  k_max: 7 #null          # null -> n_sat - 1, i.e. always >=1 satellite held out #here we are trying to not get overfitting so soon but reducing kmax and kmin
+  input_da:
+    _target_: contrib.glorys12.real_random.load_real_satellites
+    var: sla
+    sat_paths:         # the random pool — see the AltiKa/SWOT note below
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_c2n_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_h2b_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_j3n_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_s3a_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_s3b_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_s6alr_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_swon_real_2023-01-01_2025-07-31.nc
+      # - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_alg_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_SWOT_real_2023-01-01_2025-07-31.nc
+  domains:
+    train:
+      time: {_target_: builtins.slice, _args_: ['2023-01-01', '2025-03-31']}
+    val:
+      time: {_target_: builtins.slice, _args_: ['2025-04-01', '2025-07-31']}
+    test: null
+  xrds_kw:
+    train:
+      patch_dims: {time: 15, lat: 256, lon: 256}
+      strides: {time: 1, lat: 16, lon: 16}
+      domain_limits: ${domain.train}
+      noise: 0.02 #null              # real data already carries observation noise
+      noise_type: gaussian+uniform
+      periodic_dim: lon
+      padded_dim: lat
+    val:
+      patch_dims: {time: 15, lat: 512, lon: 512}
+      strides: {time: 1, lat: 136, lon: 488}
+      domain_limits: ${domain.train}
+      noise: 0.02 #null 
+      noise_type: uniform-constant
+  dl_kw: {batch_size: 16, num_workers: 8}
+
+model:
+  _target_: contrib.glorys12.real_random.LitUnetReal
+  w_grad_mse: 1000.0 #0.0            # drop the sobel/gradient term — can't work on a sparse target
+  opt_fn:
+    _target_: contrib.glorys12.unet.cosanneal_lr_adam_base
+    _partial_: true
+    lr: 0.000015
+    T_max: ${trainer.max_epochs}
+
+
+entrypoints:
+- _target_: pytorch_lightning.seed_everything
+  seed: 333
+- _target_: contrib.glorys12.train_from_pretrained_model
+  trainer: ${trainer}
+  lit_mod: ${model}
+  dm: ${datamodule}
+  config_path: ${config_path}
+  ckpt_path: ${ckpt}
+config_path: /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-06-15/SWOTN6Nadirs2024-16-34-21/.hydra/config.yaml
+
+
+defaults:
+  - unet
+  - _self_

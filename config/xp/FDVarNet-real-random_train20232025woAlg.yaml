@@ -1,0 +1,155 @@
+# @package _global_
+domain: ???
+ckpt: null
+xpname: FDVarNet2D56M_Lit4dVarNetRealSparse_bs2_real_random_7nadirNSwot_train20232025withoutAlg
+
+# trainer:
+#   _target_: pytorch_lightning.Trainer
+#   inference_mode: false
+#   deterministic: true
+#   gradient_clip_val: 0.5
+#   accelerator: gpu
+#   devices: 1
+#   logger:
+#     _target_: pytorch_lightning.loggers.tensorboard.TensorBoardLogger
+#     save_dir: ${hydra:runtime.output_dir}
+#     name: ${hydra:runtime.choices.xp}
+#     version: ''
+#   max_epochs: 1000
+#   limit_train_batches: 250
+#   callbacks:
+#   - _target_: pytorch_lightning.callbacks.LearningRateMonitor
+#   - _target_: pytorch_lightning.callbacks.ModelCheckpoint
+#     monitor: val_mse
+#     save_last: true
+#     save_top_k: 3
+#     filename: '{val_mse:.5f}-{epoch:03d}'
+#   check_val_every_n_epoch: 6
+
+datamodule:
+  _target_: contrib.glorys12.real_random.RealRandomDataModule
+  k_min: 2
+  k_max: 7 #null          # null -> n_sat - 1, i.e. always >=1 satellite held out #here we are trying to not get overfitting so soon but reducing kmax and kmin
+  input_da:
+    _target_: contrib.glorys12.real_random.load_real_satellites
+    var: sla
+    sat_paths:         # the random pool — see the AltiKa/SWOT note below
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_c2n_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_h2b_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_j3n_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_s3a_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_s3b_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_s6alr_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_swon_real_2023-01-01_2025-07-31.nc
+      # - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_alg_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_SWOT_real_2023-01-01_2025-07-31.nc
+  domains:
+    train:
+      time: {_target_: builtins.slice, _args_: ['2023-01-01', '2025-03-31']}
+    val:
+      time: {_target_: builtins.slice, _args_: ['2025-04-01', '2025-07-31']}
+    test: null
+  xrds_kw:
+    train:
+      patch_dims: {time: 15, lat: 256, lon: 256}
+      strides: {time: 1, lat: 16, lon: 16}
+      domain_limits: ${domain.train}
+      noise: 0.02 #null              # real data already carries observation noise
+      noise_type: gaussian+uniform
+      periodic_dim: lon
+      padded_dim: lat
+    val:
+      patch_dims: {time: 15, lat: 512, lon: 512}
+      strides: {time: 1, lat: 136, lon: 488}
+      domain_limits: ${domain.train}
+      noise: 0.02 #null 
+      noise_type: uniform-constant
+  dl_kw: {batch_size: 2, num_workers: 8}
+
+model: #56M parameters, remark that here we need to modified the reject batch to not reject everything by using Lit4dVarNetRealSparse
+  _target_: contrib.4dvarnet_latent.models.Lit4dVarNetRealSparse
+  w_mse: 50.0
+  w_grad_mse: 1000.0
+  w_prior: 1.0
+  persist_rw: false
+  opt_fn:
+    _target_: contrib.4dvarnet_latent.models.cosanneal_lr_adam_base
+    _partial_: true
+    lr: 0.0001
+    T_max: ${trainer.max_epochs}
+  rec_weight:
+    _target_: ocean4dvarnet.utils.get_triang_time_wei
+    patch_dims: ${datamodule.xrds_kw.train.patch_dims}
+    crop: {time: 0, lat: 4, lon: 4}
+  val_rec_weight:
+    _target_: ocean4dvarnet.utils.get_triang_time_wei
+    patch_dims: ${datamodule.xrds_kw.val.patch_dims}
+    crop: {time: 0, lat: 4, lon: 4}
+  norm_stats: ${datamodule.norm_stats}
+  w_mse_lr: 0.0
+  w_grad_mse_lr: 0
+  osse_with_interp_error: false
+  solver:
+    _target_: contrib.4dvarnet_latent.models.GradSolver_withStep
+    dim_in: 15
+    dropout: 0.1
+    channel_dims:
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 512
+    bias: false
+    interp_mode: bilinear
+    activation_layer:
+      _target_: torch.nn.ReLU
+    n_step: 5
+    lr_grad: 0.0
+    std_init: 0.1
+    input_grad_update: grad
+    prior_cost:
+      _target_: contrib.4dvarnet_latent.models.GenericAEPriorCost
+      model_ae:
+        _target_: contrib.4dvarnet_latent.unet_unrolling.UNetModel
+        dims: 2
+        in_channels: 15
+        out_channels: 15
+        model_channels: 64
+        num_res_blocks: 2
+        channel_mult:
+        - 1
+        - 2
+        - 4
+        attention_resolutions: []
+        use_checkpoint: true
+        dropout: 0.1
+        bias: false
+    obs_cost:
+      _target_: ocean4dvarnet.models.BaseObsCost
+    grad_mod:
+      _target_: contrib.4dvarnet_latent.models.GradModelWithCondition
+      grad_model:
+        _target_: contrib.4dvarnet_latent.unet_unrolling.UNetModel2
+        dims: 2
+        in_channels: 15
+        out_channels: 15
+        model_channels: 96
+        num_res_blocks: 3
+        channel_mult:
+        - 1
+        - 2
+        - 4
+        attention_resolutions: []
+        use_checkpoint: true
+        dropout: 0.1
+        bias: false
+        interp_mode: bilinear
+
+defaults:
+  - unet
+  - _self_

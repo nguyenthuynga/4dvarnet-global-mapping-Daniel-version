@@ -1,4 +1,5 @@
 from collections import namedtuple
+from os import rename
 from pathlib import Path
 import re
 import sys
@@ -273,6 +274,47 @@ def _run(cfg):
     )
 
     da = xr.open_dataset(cfg["input"])[cfg.get("input_var", "ssh")].sel(sel)
+    
+    #Nga add these below lines ******************
+    rename = {}
+    if "latitude" in da.dims or "latitude" in da.coords:
+        rename["latitude"] = "lat"
+    if "longitude" in da.dims or "longitude" in da.coords:
+        rename["longitude"] = "lon"
+    da = da.rename(rename)
+    
+    # # Make sure longitude is in [-180, 180)
+    # if float(da.lon.max()) > 180:
+    #     da = da.assign_coords(lon=((da.lon + 180) % 360) - 180)
+
+    # da = da.sortby("lon")
+
+    # # Crop latitude to Daniel's domain
+    # da = da.sel(lat=slice(-79.88, 81.88))
+
+    # # Extend longitude periodically: 1440 -> 1488
+    # n_extend = 24
+
+    # left = da.isel(lon=slice(-n_extend, None)).copy()
+    # left = left.assign_coords(lon=left.lon - 360)
+
+    # right = da.isel(lon=slice(0, n_extend)).copy()
+    # right = right.assign_coords(lon=right.lon + 360)
+
+    # da = xr.concat([left, da, right], dim="lon").sortby("lon")
+
+    # # Safety check
+    # print("Inference input after Daniel-grid transform:")
+    # print(da)
+    # print("shape:", da.shape)
+    # print("lat:", float(da.lat[0]), float(da.lat[-1]), "nlat:", da.sizes["lat"])
+    # print("lon:", float(da.lon[0]), float(da.lon[-1]), "nlon:", da.sizes["lon"])
+
+    # assert da.sizes["lat"] == 648, da.sizes
+    # assert da.sizes["lon"] == 1488, da.sizes
+    #*****************************************************
+
+
     postpro_fns = (
         lambda item: PredictItem._make((
             item.values.astype(np.float32),

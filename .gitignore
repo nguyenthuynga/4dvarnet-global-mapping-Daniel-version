@@ -1,3 +1,10 @@
 __pycache__
 outputs
 data
+outputs/
+inference/outputs/
+*.ckpt
+*.nc
+*.bak.*
+__pycache__/
+.ipynb_checkpoints/

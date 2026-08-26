@@ -1,0 +1,92 @@
+# @package _global_
+domain: ???
+ckpt: null
+xpname: FDVarNet3D_18M_Lit4dVarNetRealSparse_bs2_real_random_7nadirNSwot_train20232025withoutAlg
+
+
+datamodule:
+  _target_: contrib.glorys12.real_random.RealRandomDataModule
+  k_min: 2
+  k_max: 7 #null          # null -> n_sat - 1, i.e. always >=1 satellite held out #here we are trying to not get overfitting so soon but reducing kmax and kmin
+  input_da:
+    _target_: contrib.glorys12.real_random.load_real_satellites
+    var: sla
+    sat_paths:         # the random pool — see the AltiKa/SWOT note below
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_c2n_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_h2b_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_j3n_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_s3a_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_s3b_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_s6alr_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_swon_real_2023-01-01_2025-07-31.nc
+      # - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_alg_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_SWOT_real_2023-01-01_2025-07-31.nc
+  domains:
+    train:
+      time: {_target_: builtins.slice, _args_: ['2023-01-01', '2025-03-31']}
+    val:
+      time: {_target_: builtins.slice, _args_: ['2025-04-01', '2025-07-31']}
+    test: null
+  xrds_kw:
+    train:
+      patch_dims: {time: 15, lat: 256, lon: 256}
+      strides: {time: 1, lat: 16, lon: 16}
+      domain_limits: ${domain.train}
+      noise: 0.02 #null              # real data already carries observation noise
+      noise_type: gaussian+uniform
+      periodic_dim: lon
+      padded_dim: lat
+    val:
+      patch_dims: {time: 15, lat: 512, lon: 512}
+      strides: {time: 1, lat: 136, lon: 488}
+      domain_limits: ${domain.train}
+      noise: 0.02 #null 
+      noise_type: uniform-constant
+  dl_kw: {batch_size: 2, num_workers: 8}
+
+
+model: #remark that here we need to modified the reject batch to not reject everything by using Lit4dVarNetRealSparse
+  _target_: contrib.4dvarnet_3d.models_UNet_unrolling.Lit4dVarNetRealSparse #Lit4dVarNetIgnoreNaN
+  w_mse: 50.
+  w_grad_mse: 1000.
+  w_prior: 1.
+  w_mse_lr: 0.
+  w_grad_mse_lr: 0
+  osse_with_interp_error: false
+  opt_fn:
+    _target_: contrib.glorys12.unet.cosanneal_lr_adam_base   # or copy src.utils.cosanneal_lr_adam
+    _partial_: true
+    lr: 1e-4
+    T_max: ${trainer.max_epochs}
+  rec_weight:
+    _target_: ocean4dvarnet.utils.get_triang_time_wei
+    patch_dims: ${datamodule.xrds_kw.train.patch_dims}
+    crop: {time: 0, lat: 4, lon: 4}
+  val_rec_weight:
+    _target_: ocean4dvarnet.utils.get_triang_time_wei
+    patch_dims: ${datamodule.xrds_kw.val.patch_dims}
+    crop: {time: 0, lat: 4, lon: 4}
+  solver:
+    _target_: contrib.4dvarnet_3d.models_UNet_unrolling.GradSolver_withStep
+    n_step: 3
+    lr_grad: 0
+    std_init: 0.1
+    input_grad_update: 'subgrad+state'
+    prior_cost:
+      _target_: contrib.4dvarnet_3d.models_UNet_unrolling.GenericAEPriorCost
+      model_ae:
+        _target_: contrib.4dvarnet_3d.unet_UNetUnroliing_3d_film.UNet3D_Transformer_priorcost
+        in_channels: 1
+        channels: [24, 48, 96, 192]
+    obs_cost:
+      _target_: ocean4dvarnet.models.BaseObsCost
+    grad_mod:
+      _target_: contrib.4dvarnet_3d.models_UNet_unrolling.GradModelWithCondition
+      grad_model:
+        _target_: contrib.4dvarnet_3d.unet_UNetUnroliing_3d_film.UNet3D_Transformer_gradmod
+        in_channels: 3
+        channels: [24, 48, 96, 192]
+
+defaults:
+  - unet
+  - _self_
