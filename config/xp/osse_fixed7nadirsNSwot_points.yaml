@@ -1,0 +1,69 @@
+# @package _global_
+# Fixed constellation (7 nadirs + SWOT), extra RANDOM PIXEL removal.
+# Dorffer et al. Fig. 11 / Table III: "random pixel level obs."
+domain: ???
+ckpt: null
+xpname: osse_fixed7nadirsNSwot_points
+
+datamodule:
+  _target_: contrib.glorys12.osse_extra_mask.OSSEExtraMaskDataModule
+  mode_target: gapfree
+
+  # --- constellation is FIXED: 8 masks in the pool, k pinned to 8,
+  #     so the random-k draw always selects all of them (one fixed union).
+  k_min: 8
+  k_max: 8
+
+  # --- the extra masking -------------------------------------------------
+  extra_mask: points       # squares | points | null
+  keep_frac: 0.5           # fraction of OBSERVED pixels kept (0.5 = remove half)
+  square_half_min: 2       # rectangle half-size, as in 4dvarnet-starter rand_obs
+  square_half_max: 10
+  apply_to_val: true       # same task in val -> val_mse stays a fair monitor
+  debug_items: 3           # per-worker debug lines; use check_extra_mask.py for real numbers
+
+  input_da:
+    _target_: contrib.glorys12.real_random_osse.load_glorys12_osse_masks
+    tgt_path: /SCRATCH/n23nguye/glorys12_2010_2019_daily_sla_4th_target_gridded_alongtrack.nc
+    tgt_var: sla
+    mask_var: mask
+    target_mask_idx: [0,1,2,3,4,5,6,7]   # unused when mode_target=gapfree
+    mask_paths:                          # 7 nadirs + SWOT -- AltiKa (alg) stays OUT
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_c2n_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_h2b_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_j3n_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_s3a_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_s3b_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_s6alr_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_swon_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_SWOT_2024_365d.nc   # KaRIn, LWE-removed
+  domains:
+    train:
+      time: {_target_: builtins.slice, _args_: ['2010-01-01', '2017-10-31']}
+    val:
+      time: {_target_: builtins.slice, _args_: ['2017-12-01', '2018-11-30']}
+    test: null
+  xrds_kw:
+    train:
+      patch_dims: {time: 15, lat: 256, lon: 256}
+      strides: {time: 1, lat: 16, lon: 16}
+      domain_limits: ${domain.train}
+      noise: 0.03
+      noise_type: gaussian+uniform
+      periodic_dim: lon
+      padded_dim: lat
+    val:
+      patch_dims: {time: 15, lat: 512, lon: 512}
+      strides: {time: 1, lat: 136, lon: 488}
+      domain_limits: ${domain.train}
+      noise: 0.03
+      noise_type: uniform-constant
+  dl_kw: {batch_size: 16, num_workers: 12}
+
+model:
+  _target_: contrib.glorys12.real_random.LitUnetReal
+  w_grad_mse: 1000.0
+
+defaults:
+  - unet
+  - _self_

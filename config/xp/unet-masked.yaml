@@ -4,7 +4,7 @@
 
 domain: ???
 ckpt: null
-xpname: Only2nadirs_s3aNs6a2024
+xpname: S7nadirsNSwot_unet
 
 
 
@@ -19,7 +19,8 @@ datamodule: #Nga code for 2024
     # inp_var: sla
     # inp_path: /SCRATCH/n23nguye/mapping_2024/mask_onlynadirs_2024_365d.nc # ONLY 6nadirs mask_onlynadirs_2024_365d.nc
     # inp_path: /SCRATCH/n23nguye/mapping_2024/mask_nadirsNswot_2024_365d.nc # SWOT+6nadirs
-    inp_path: /SCRATCH/n23nguye/mapping_2023_2025/mask_only2nadirss3aNs6a_2024_365d.nc # SWOT+6nadirs
+    # inp_path: /SCRATCH/n23nguye/mapping_2023_2025/mask_only2nadirss3aNs6a_2024_365d.nc # SWOT+6nadirs
+    inp_path: /SCRATCH/n23nguye/mapping_2023_2025/mask_S7nadirsNswotKarinWithLweRemoved_2024_365d.nc # SWOT+7nadirs
     inp_var: mask          # <-- Nga mask's variable name (Daniel's is 'inp')
   xrds_kw:
     train:

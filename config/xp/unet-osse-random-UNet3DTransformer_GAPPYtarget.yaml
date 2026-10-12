@@ -1,7 +1,7 @@
 # @package _global_
 domain: ???
 ckpt: null
-xpname: osse_random_pretrain_UNet3DTransformer_bs8
+xpname: osse_random_pretrain_UNet3DTransformer_bs8  #remember to add mode_target: gapfree/gappy
 
 datamodule:
   _target_: contrib.glorys12.real_random_osse.RealRandomOSSEDataModule
@@ -26,9 +26,9 @@ datamodule:
       - /SCRATCH/n23nguye/mapping_2023_2025/mask_SWOT_2024_365d.nc    # KaRIn swath, LWE-removed
   domains:
     train:
-      time: {_target_: builtins.slice, _args_: ['2010-01-01', '2017-12-31']}
+      time: {_target_: builtins.slice, _args_: ['2010-01-01', '2017-10-31']}
     val:
-      time: {_target_: builtins.slice, _args_: ['2018-01-01', '2018-12-31']}
+      time: {_target_: builtins.slice, _args_: ['2017-12-01', '2018-11-30']}
     test: null
   xrds_kw:
     train:

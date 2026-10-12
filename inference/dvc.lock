@@ -1,11 +1,11 @@
 schema: '2.0'
 stages:
   inference:
-    cmd: "python inferring.py +input=/SCRATCH/n23nguye/mapping_2023_2025/osse_with_ose_footprint/Glorys12_alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31_with_Altika.nc
-      +checkpoint_path=/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-14/FDVarNet3D_18M_Lit4dVarNetRealSparse_bs2_real_random_7nadirNSwot_train20232025withoutAlg-12-23-38_/FDVarNet_3D-real-random_train20232025woAlg/checkpoints/val_mse1p95882-epoch608.ckpt
-      +config_path=/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-14/FDVarNet3D_18M_Lit4dVarNetRealSparse_bs2_real_random_7nadirNSwot_train20232025withoutAlg-12-23-38_/.hydra/config.yaml
-      +output_path=./outputs//FDVarNet3D18M_bs2_real_random_7nadirNSwot_train20232025withoutAlg_OSSEinference.nc
-      +patch=15-512-512 +stride=1-208-232 +period_from=2023-12-01 +period_to=2025-01-31
+    cmd: "python inferring.py +input=/SCRATCH/n23nguye/mapping_2023_2025/alongtrack_only2nadirss3aNs6a_real_2023-01-01_2025-07-31.nc
+      +checkpoint_path=/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-28/only4nadirsj3ns3as3bs6a_unet-17-50-28/unet-masked/checkpoints/val_mse1p10308-epoch599.ckpt
+      +config_path=/Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-08-28/only4nadirsj3ns3as3bs6a_unet-17-50-28/.hydra/config.yaml
+      +output_path=./outputs//fdvarnet-glo12-sla--unet-Train4Nadirs_Test2Nadirs.nc
+      +patch=15-720-1440 +stride=1-208-232 +period_from=2023-12-01 +period_to=2025-01-31
       +input_var=sla +output_var=sla +output_dc_format=true +batch_size=1 +ensemble_noise=0.2
       +ensemble_size=10 hydra.run.dir=. hydra.output_subdir=null hydra/job_logging=disabled
       hydra/hydra_logging=disabled\n"

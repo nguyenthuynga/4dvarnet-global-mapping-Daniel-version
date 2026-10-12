@@ -8,3 +8,14 @@ inference/outputs/
 *.bak.*
 __pycache__/
 .ipynb_checkpoints/
+multirun/
+lightning_logs/
+wandb/
+*.pt
+*.pth
+*.npy
+*.npz
+*.h5
+*.zarr/
+*events.out.tfevents*
+slurm-*.out
