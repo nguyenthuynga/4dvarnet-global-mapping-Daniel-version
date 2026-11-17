@@ -1,0 +1,19 @@
+# @package _global_
+# Continue the interrupted 1/8° run from its checkpoint, with the train period
+# set back to 01/2023 - 03/2025. Everything else comes from the 1/8° file.
+xpname: Resolution8th_UNet3DTransformer_size384_kmax7_real_random_7nadirNSwot_train20232025withoutAlg_precisionbf16mixed_resumed
+
+defaults:
+  - UNet3DTransformer-real-random_train20232025woAlg_trainfromJuly2023_8thresolution
+  - _self_
+
+# Lightning restores the weights, the optimizer, the LR schedule and the epoch counter from this file.
+# If the same folder has a last.ckpt, it is more recent (epoch 173) and can be used instead.
+ckpt: /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-11-09/Resolution8th_UNet3DTransformer_size384_kmax7_real_random_7nadirNSwot_train20232025withoutAlg_FromJuly2023_precisionbf16mixed-15-02-01/UNet3DTransformer-real-random_train20232025woAlg_trainfromJuly2023_8thresolution.yaml/checkpoints/val_mse1p96444-epoch170.ckpt
+
+datamodule:
+  domains:
+    train:
+      time: {_target_: builtins.slice, _args_: ['2023-01-01', '2025-03-31']}
+    val:   # written out so it cannot overlap the train period, whatever the July file says
+      time: {_target_: builtins.slice, _args_: ['2025-04-01', '2025-07-31']}

@@ -36,20 +36,45 @@ from .unet import (
 # ----------------------------------------------------------------------
 # loader: open the per-satellite gridded files lazily, stack on a 'sat' axis
 # ----------------------------------------------------------------------
+# def load_real_satellites(sat_paths, var="sla", **_ignored): ############# old, that makes out of memory in RAM
+#     # _ignored absorbs leftover tgt_path/inp_path/tgt_var/inp_var from the
+#     # merged base unet.yaml so Hydra's deep-merge can't crash the call
+    
+#     das = []
+#     for p in sat_paths:
+#         ds = xr.open_dataset(p)              # lazy; only patches get read later
+#         ren = {}
+#         if "latitude" in ds.dims:
+#             ren["latitude"] = "lat"
+#         if "longitude" in ds.dims:
+#             ren["longitude"] = "lon"
+#         das.append(ds.rename(ren)[var])
+#     sats = xr.concat(das, dim="sat")         # (sat, time, lat, lon), gappy (NaN off-track)
+#     print(f"[real-random] pool = {len(das)} satellites, dims = {dict(sats.sizes)}")
+#     assert "tgt_path" not in _ignored or sat_paths, "sat_paths missing — input_da merge problem"
+#     return sats
+
 def load_real_satellites(sat_paths, var="sla", **_ignored):
     # _ignored absorbs leftover tgt_path/inp_path/tgt_var/inp_var from the
     # merged base unet.yaml so Hydra's deep-merge can't crash the call
-    
+
     das = []
     for p in sat_paths:
-        ds = xr.open_dataset(p)              # lazy; only patches get read later
+        ds = xr.open_dataset(p, cache=False)     # lazy, and not cached in RAM
         ren = {}
         if "latitude" in ds.dims:
             ren["latitude"] = "lat"
         if "longitude" in ds.dims:
             ren["longitude"] = "lon"
         das.append(ds.rename(ren)[var])
-    sats = xr.concat(das, dim="sat")         # (sat, time, lat, lon), gappy (NaN off-track)
+
+    # fill one preallocated array, one file at a time (xr.concat holds two copies)
+    first = das[0]
+    out = np.empty((len(das),) + first.shape, dtype=first.dtype)
+    for i, da in enumerate(das):
+        assert da.shape == first.shape and np.array_equal(da.time.values, first.time.values)
+        out[i] = da.values
+    sats = xr.DataArray(out, dims=("sat",) + first.dims, coords=first.coords)  # (sat, time, lat, lon), gappy (NaN off-track)
     print(f"[real-random] pool = {len(das)} satellites, dims = {dict(sats.sizes)}")
     assert "tgt_path" not in _ignored or sat_paths, "sat_paths missing — input_da merge problem"
     return sats

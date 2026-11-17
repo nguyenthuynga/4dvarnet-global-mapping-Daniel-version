@@ -1,0 +1,55 @@
+==========================================================
+>>> alg   nadirs: alg   KaRIn: 0   start 16:02:48
+[NbConvertApp] Converting notebook Regrid_from_1D_to_2D_for_2024_SWOTnNadirs_2ConfigInOne_KarinWithLweRemoved_ONLY_SWOT_8th.ipynb to notebook
+[NbConvertApp] Writing 850573 bytes to /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/binning_8th_executed/binned8th_alg.ipynb
+[done] alg   16:14:07
+==========================================================
+>>> c2n   nadirs: c2n   KaRIn: 0   start 16:14:07
+[NbConvertApp] Converting notebook Regrid_from_1D_to_2D_for_2024_SWOTnNadirs_2ConfigInOne_KarinWithLweRemoved_ONLY_SWOT_8th.ipynb to notebook
+[NbConvertApp] Writing 824009 bytes to /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/binning_8th_executed/binned8th_c2n.ipynb
+[done] c2n   16:25:39
+==========================================================
+>>> h2b   nadirs: h2b   KaRIn: 0   start 16:25:39
+[NbConvertApp] Converting notebook Regrid_from_1D_to_2D_for_2024_SWOTnNadirs_2ConfigInOne_KarinWithLweRemoved_ONLY_SWOT_8th.ipynb to notebook
+[NbConvertApp] Writing 870593 bytes to /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/binning_8th_executed/binned8th_h2b.ipynb
+[done] h2b   16:36:04
+==========================================================
+>>> j3n   nadirs: j3n   KaRIn: 0   start 16:36:04
+[NbConvertApp] Converting notebook Regrid_from_1D_to_2D_for_2024_SWOTnNadirs_2ConfigInOne_KarinWithLweRemoved_ONLY_SWOT_8th.ipynb to notebook
+[NbConvertApp] Writing 832517 bytes to /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/binning_8th_executed/binned8th_j3n.ipynb
+[done] j3n   16:46:01
+==========================================================
+>>> s3a   nadirs: s3a   KaRIn: 0   start 16:46:01
+[NbConvertApp] Converting notebook Regrid_from_1D_to_2D_for_2024_SWOTnNadirs_2ConfigInOne_KarinWithLweRemoved_ONLY_SWOT_8th.ipynb to notebook
+[NbConvertApp] Writing 828433 bytes to /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/binning_8th_executed/binned8th_s3a.ipynb
+[done] s3a   16:57:36
+==========================================================
+>>> s3b   nadirs: s3b   KaRIn: 0   start 16:57:36
+[NbConvertApp] Converting notebook Regrid_from_1D_to_2D_for_2024_SWOTnNadirs_2ConfigInOne_KarinWithLweRemoved_ONLY_SWOT_8th.ipynb to notebook
+[NbConvertApp] Writing 838917 bytes to /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/binning_8th_executed/binned8th_s3b.ipynb
+[done] s3b   17:09:14
+==========================================================
+>>> s6alr   nadirs: s6a-lr   KaRIn: 0   start 17:09:14
+[NbConvertApp] Converting notebook Regrid_from_1D_to_2D_for_2024_SWOTnNadirs_2ConfigInOne_KarinWithLweRemoved_ONLY_SWOT_8th.ipynb to notebook
+[NbConvertApp] Writing 848999 bytes to /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/binning_8th_executed/binned8th_s6alr.ipynb
+[done] s6alr   17:21:14
+==========================================================
+>>> swon   nadirs: swon   KaRIn: 0   start 17:21:14
+[NbConvertApp] Converting notebook Regrid_from_1D_to_2D_for_2024_SWOTnNadirs_2ConfigInOne_KarinWithLweRemoved_ONLY_SWOT_8th.ipynb to notebook
+[NbConvertApp] Writing 829380 bytes to /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/binning_8th_executed/binned8th_swon.ipynb
+[done] swon   17:30:49
+==========================================================
+>>> SWOT   nadirs: none   KaRIn: 1   start 17:30:49
+[NbConvertApp] Converting notebook Regrid_from_1D_to_2D_for_2024_SWOTnNadirs_2ConfigInOne_KarinWithLweRemoved_ONLY_SWOT_8th.ipynb to notebook
+[NbConvertApp] Writing 1042894 bytes to /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/binning_8th_executed/binned8th_SWOT.ipynb
+[done] SWOT   18:31:58
+==========================================================
+>>> S7nadirsNswotKarinWithLweRemoved   nadirs: c2n,h2b,j3n,s3a,s3b,s6a-lr,swon   KaRIn: 1   start 18:31:58
+[NbConvertApp] Converting notebook Regrid_from_1D_to_2D_for_2024_SWOTnNadirs_2ConfigInOne_KarinWithLweRemoved_ONLY_SWOT_8th.ipynb to notebook
+[NbConvertApp] Writing 1234743 bytes to /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/binning_8th_executed/binned8th_S7nadirsNswotKarinWithLweRemoved.ipynb
+[done] S7nadirsNswotKarinWithLweRemoved   20:15:01
+==========================================================
+ finished: 10 ok, 0 failed   mer. 04 nov. 2026 20:15:01 CET
+ next: run Combine_SWOT_n_Swon.ipynb with D = the 1/8 deg OUT_DIR
+       (writes the SWOT & swon test input)
+==========================================================

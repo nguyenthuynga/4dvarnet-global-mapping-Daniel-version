@@ -1,0 +1,86 @@
+# @package _global_
+#
+# Joint OSSE + OSE training of the usual UNet2D (15 days in, 15 days out), from scratch.
+# Code: contrib/glorys12/joint_osse_ose.py
+#   train : 50/50 mix, every batch = half GLORYS 2010-2017 (OSSE, gappy target)
+#                                   + half real data (OSE, AltiKa included, exclude 2024)
+#   val   : GLORYS 2018 (OSSE only)
+# Both datasets use the same 8 sources (7 nadirs + SWOT KaRIn) and the same rule:
+# input = random k of the 8, target = all 8. Both are normalised with the GLORYS stats
+# (norm_stats from base.yaml): at inference pass +mean / +std with these same values.
+
+
+domain: ???
+ckpt: null
+xpname: joint_osse_ose_unet2d_gappy
+
+datamodule:
+  _target_: contrib.glorys12.joint_osse_ose.JointOSSEOSEDataModule
+  mode_target: gappy
+  k_min: 2
+  k_max: 7
+  ose_noise: 0.02           # input noise for the OSE patches (OSSE patches use xrds_kw.train.noise)
+  input_da:                 # OSSE: GLORYS + the 2024 footprints (allow AltiKa)
+    _target_: contrib.glorys12.real_random_osse.load_glorys12_osse_masks
+    tgt_path: /SCRATCH/n23nguye/glorys12_2010_2019_daily_sla_4th_target_gridded_alongtrack.nc
+    tgt_var: sla
+    mask_var: mask
+    target_mask_idx: [0, 1, 2, 3, 4, 5, 6, 7]
+    mask_paths:
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_c2n_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_h2b_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_j3n_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_s3a_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_s3b_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_s6alr_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_alg_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_swon_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/mask_SWOT_2024_365d.nc
+  ose_da:                   # OSE: the per-satellite gridded real data
+    _target_: contrib.glorys12.real_random.load_real_satellites
+    var: sla
+    sat_paths:
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_c2n_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_h2b_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_j3n_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_s3a_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_s3b_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_s6alr_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_alg_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_swon_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025/alongtrack_SWOT_real_2023-01-01_2025-07-31.nc
+  domains:
+    train:                  # OSSE training period
+      time: {_target_: builtins.slice, _args_: ['2010-01-01', '2017-12-31']}
+    val:                    # OSSE validation period
+      time: {_target_: builtins.slice, _args_: ['2018-01-01', '2018-12-31']}
+    test: null
+  ose_periods:              # OSE training: one entry per continuous period
+    # - time: {_target_: builtins.slice, _args_: ['2023-01-01', '2025-07-31']}
+    # to keep the 2024 test year out, use these two lines instead:
+    - time: {_target_: builtins.slice, _args_: ['2023-01-01', '2023-11-30']}
+    - time: {_target_: builtins.slice, _args_: ['2025-02-01', '2025-07-31']}
+  xrds_kw:
+    train:
+      patch_dims: {time: 15, lat: 256, lon: 256}
+      strides: {time: 1, lat: 16, lon: 16}
+      domain_limits: ${domain.train}
+      noise: 0.03
+      noise_type: gaussian+uniform
+      periodic_dim: lon
+      padded_dim: lat
+    val:
+      patch_dims: {time: 15, lat: 512, lon: 512}
+      strides: {time: 1, lat: 136, lon: 488}
+      domain_limits: ${domain.train}
+      noise: 0.03
+      noise_type: uniform-constant
+  dl_kw: {batch_size: 16, num_workers: 8}
+
+model:
+  _target_: contrib.glorys12.real_random.LitUnetReal   # same UNet2D as unet.yaml, sparse-target loss
+  w_grad_mse: 1000.0
+
+defaults:
+  - unet
+  - _self_

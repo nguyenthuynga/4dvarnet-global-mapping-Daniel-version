@@ -1,0 +1,41 @@
+# @package _global_
+xpname: osse_random_pretrain_Resolution8th_UNet2D_GAPFREEtarget_k2to8
+
+datamodule:
+  k_max: 8                                   # 2..8 sources (out of the 9 patterns)
+  input_da:
+    tgt_path: /SCRATCH/n23nguye/glorys12_2010_2019_daily_sla_8th_gridded_from_alongtrack_float32.nc
+    tgt_var: tgt
+    mask_paths:                              # FULL list, same 9 sources, same order as the parent
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/mask_alg_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/mask_c2n_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/mask_h2b_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/mask_j3n_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/mask_s3a_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/mask_s3b_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/mask_s6alr_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/mask_swon_2024_365d.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/mask_SWOT_2024_365d.nc
+  xrds_kw:
+    train:
+      patch_dims: {time: 15, lat: 512, lon: 512}    # same 64°×64° as 256 at 1/4°
+      strides: {time: 1, lat: 32, lon: 32}          # same 4° step as 16 at 1/4°
+    val:
+      patch_dims: {time: 15, lat: 1024, lon: 1024}  # same area as 512 at 1/4°
+      strides: {time: 1, lat: 272, lon: 976}        # same patch positions as 136/488
+  dl_kw: {batch_size: 16, num_workers: 8}            # 4×512² = same pixels per batch as 16×256²
+  norm_stats:                                       # recompute on the 1/8° file (snippet below)
+    train: [-0.0000391422872780, 0.04513292387127876]
+    val:   [0.0000167379766935, 0.04498553276062012]
+
+# model:
+#   solver:
+#     channel_dims: [256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 512]
+    
+trainer:
+  limit_train_batches: 250        # 1000×4 = same 4000 patches per epoch as before, because batchsize is 4 here
+  # accumulate_grad_batches: 4       # optional: 16 patches per optimizer step, as before
+
+defaults:
+  - unet-osse-random-UNet2D_GAPFREEtarget
+  - _self_

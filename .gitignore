@@ -19,3 +19,14 @@ wandb/
 *.zarr/
 *events.out.tfevents*
 slurm-*.out
+multirun/
+lightning_logs/
+wandb/
+*.pt
+*.pth
+*.npy
+*.npz
+*.h5
+*.zarr/
+*events.out.tfevents*
+slurm-*.out

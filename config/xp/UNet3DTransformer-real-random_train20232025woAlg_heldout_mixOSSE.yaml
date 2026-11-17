@@ -1,0 +1,67 @@
+# @package _global_
+# Same as the held-out OSE run, plus OSSE batches in the same training. Each step uses one OSE batch
+# (4 patches, held-out target) and one OSSE batch (4 patches, GLORYS gap-free target): same 8 patches
+# per step as before. Each loss is averaged over its own pixels, then
+#     loss = (1 - osse_weight) * loss_OSE + osse_weight * loss_OSSE
+# Validation, val_mse and checkpoints: OSE held-out only, as in the held-out run.
+xpname: UNet3DTransformer_bs4n4_mixed_OSSEgapfree_OSEheldout_7nadirNSwot_train20232025withoutAlg
+
+datamodule:
+  _target_: contrib.glorys12.real_random_heldoutloss.MixedOsseOseDataModule
+  target_mode: heldout                          # OSE loss only on the satellites not given as input
+  dl_kw: {batch_size: 4, num_workers: 8}       # OSE half of each step (was 8)
+  osse:   # copied from unet-osse-random-UNet3DTransformer_GAPFREEtarget.yaml; only dl_kw and norm_stats differ
+    _target_: contrib.glorys12.real_random_osse.RealRandomOSSEDataModule
+    mode_target: gapfree
+    k_min: 2
+    k_max: 7
+    input_da:
+      _target_: contrib.glorys12.real_random_osse.load_glorys12_osse_masks
+      tgt_path: /SCRATCH/n23nguye/glorys12_2010_2019_daily_sla_4th_target_gridded_alongtrack.nc
+      tgt_var: sla
+      mask_var: mask
+      target_mask_idx: [0,1,2,3,4,5,6,7,8]
+      mask_paths:
+        - /SCRATCH/n23nguye/mapping_2023_2025/mask_alg_2024_365d.nc
+        - /SCRATCH/n23nguye/mapping_2023_2025/mask_c2n_2024_365d.nc
+        - /SCRATCH/n23nguye/mapping_2023_2025/mask_h2b_2024_365d.nc
+        - /SCRATCH/n23nguye/mapping_2023_2025/mask_j3n_2024_365d.nc
+        - /SCRATCH/n23nguye/mapping_2023_2025/mask_s3a_2024_365d.nc
+        - /SCRATCH/n23nguye/mapping_2023_2025/mask_s3b_2024_365d.nc
+        - /SCRATCH/n23nguye/mapping_2023_2025/mask_s6alr_2024_365d.nc
+        - /SCRATCH/n23nguye/mapping_2023_2025/mask_swon_2024_365d.nc
+        - /SCRATCH/n23nguye/mapping_2023_2025/mask_SWOT_2024_365d.nc
+    domains:
+      train:
+        time: {_target_: builtins.slice, _args_: ['2010-01-01', '2017-10-31']}
+      val:
+        time: {_target_: builtins.slice, _args_: ['2017-12-01', '2018-11-30']}
+      test: null
+    xrds_kw:
+      train:
+        patch_dims: ${datamodule.xrds_kw.train.patch_dims}     # must equal the OSE patch (15 x 256 x 256)
+        strides: {time: 1, lat: 16, lon: 16}
+        domain_limits: ${domain.train}
+        noise: 0.03
+        noise_type: gaussian+uniform
+        periodic_dim: lon
+        padded_dim: lat
+      val:   # not used (validation is OSE only), kept so the OSSE datamodule sets up as usual
+        patch_dims: {time: 15, lat: 512, lon: 512}
+        strides: {time: 1, lat: 136, lon: 488}
+        domain_limits: ${domain.train}
+        noise: 0.03
+        noise_type: uniform-constant
+    dl_kw: {batch_size: 4, num_workers: 8}     # OSSE half of each step
+    norm_stats: ${datamodule.norm_stats}        # same normalisation as the OSE part
+
+model:
+  _target_: contrib.glorys12.real_random_heldoutloss.LitUnetReal
+  min_tgt_frac: 0.002      # held-out targets are sparse: skip fewer batches (default 0.02)
+  osse_weight: 0.5         # share of the OSSE loss (0 = pure OSE, 1 = pure OSSE)
+  osse_grad_mode: sobel    # gap-free OSSE target: the usual Sobel gradient term
+  # grad_mode (OSE part) stays "sobel" like the held-out run; add "grad_mode: pairs" to use the pairs gradient
+
+defaults:
+  - UNet3DTransformer-real-random_train20232025woAlg     # your base OSE config (held-out keys are set above)
+  - _self_

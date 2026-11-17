@@ -1,0 +1,32 @@
+# @package _global_
+xpname: Resolution8th_UNet3DTransformer_size384_kmax7_real_random_7nadirNSwot_train20232025withoutAlg_FromJuly2023_precisionbf16mixed
+
+# Everything not listed here (model, domains, k range, noise, validation patches) comes from the 1/4° file.
+defaults:
+  - UNet3DTransformer-real-random_train20232025woAlg_trainfromJuly2023
+  - _self_
+
+datamodule:
+  input_da:
+    sat_paths:  # full list again: a list replaces the parent's list, it is not merged
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/alongtrack_c2n_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/alongtrack_h2b_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/alongtrack_j3n_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/alongtrack_s3a_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/alongtrack_s3b_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/alongtrack_s6alr_real_2023-01-01_2025-07-31.nc
+      # - /SCRATCH/n23nguye/mapping_2023_2025_8th/alongtrack_alg_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/alongtrack_swon_real_2023-01-01_2025-07-31.nc
+      - /SCRATCH/n23nguye/mapping_2023_2025_8th/alongtrack_SWOT_real_2023-01-01_2025-07-31.nc
+  xrds_kw:
+    train:
+      patch_dims: {time: 15, lat: 384, lon: 384}
+      strides: {time: 1, lat: 24, lon: 24}
+  dl_kw: {batch_size: 4}          # num_workers stays 8 from the 1/4° file
+  norm_stats:                     # recomputed on the 1/8° file
+    train: [-0.0000391422872780, 0.04513292387127876]
+    val:   [0.0000167379766935, 0.04498553276062012]
+
+trainer:
+  precision: bf16-mixed
+  limit_train_batches: 1000       # 250*16 batch_size = same 4000 patches per epoch as before

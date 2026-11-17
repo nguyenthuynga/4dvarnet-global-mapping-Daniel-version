@@ -1,0 +1,19 @@
+# @package _global_
+# Same run as UNet3DTransformer-real-random_train20232025woAlg, with ONE change:
+# the loss is computed only on the satellites that are NOT given as input
+# (target_mode: heldout). Code: contrib/glorys12/real_random_heldoutloss.py
+# (the original real_random.py is not used by this run and stays unchanged).
+# To make a held-out version of another config, change the name under `defaults`.
+xpname: UNet3DTransformer_bs8_real_random_7nadirNSwot_train20232025withoutAlg_heldoutTarget
+
+datamodule:
+  _target_: contrib.glorys12.real_random_heldoutloss.RealRandomDataModule
+  target_mode: heldout     # default "all" = target is the union of ALL satellites (old behaviour)
+
+model:
+  _target_: contrib.glorys12.real_random_heldoutloss.LitUnetReal
+  min_tgt_frac: 0.002      # default 0.02; held-out targets are sparser, so skip fewer batches
+
+defaults:
+  - UNet3DTransformer-real-random_train20232025woAlg
+  - _self_

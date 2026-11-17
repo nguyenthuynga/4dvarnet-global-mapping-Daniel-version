@@ -1,0 +1,7 @@
+21/10 18:24  === batch started: 1 cells, logs in /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/logs_joint_cells
+21/10 18:24  [1/1] Unet2D_JointOSSEOSE_Test7nadirsNSWOT: inference started (alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-07-31.nc, patch 15-720-1440, ensemble 10, norm glorys)
+21/10 18:24        progress: tail -c 400 /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/logs_joint_cells/Unet2D_JointOSSEOSE_Test7nadirsNSWOT.infer.log | tr '\r' '\n' | grep -a Predicting | tail -1
+21/10 18:35  [1/1] Unet2D_JointOSSEOSE_Test7nadirsNSWOT: inference finished in 0h11m
+21/10 18:35  [1/1] Unet2D_JointOSSEOSE_Test7nadirsNSWOT: evaluation notebook started
+21/10 18:53  [1/1] Unet2D_JointOSSEOSE_Test7nadirsNSWOT: done in 0h17m: RMSE 0.0378, score 0.7389, eff. res. 200.2 km
+21/10 18:53  === batch finished: 1 evaluated, 0 failed, 0 inferences reused, 0 already done

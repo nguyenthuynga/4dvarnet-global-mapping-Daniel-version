@@ -1,3 +1,4 @@
+"""Claude version to save RAM memory"""
 from collections import namedtuple
 from os import rename
 from pathlib import Path
@@ -64,6 +65,7 @@ class LitModel(pl.LightningModule):
     def predict_step(self, batch, batch_idx: int, *args, **kwargs):
         if batch_idx == 0:
             self.predict_data = []
+            self._merge = None  # [CHANGE 1] running merge state, built on first patch
 
         if self.ensemble:
             outputs = 0.
@@ -98,43 +100,65 @@ class LitModel(pl.LightningModule):
             da = xr.DataArray(out, dims=self.out_dims, coords=c.coords)
             self.predict_data.append(da.astype(np.float32))
 
-    def on_predict_end(self):
+        # [CHANGE 2] merge these patches now and free them, instead of
+        # keeping every patch of the whole period in RAM until the end
+        self._merge_pending()
+
+    def _merge_pending(self):
         """
-        Merge the patches
+        [CHANGE 3] New method. Same merge code as before (moved here from
+        on_predict_end): adds the patches waiting in self.predict_data to
+        the running weighted sum, then frees them.
         """
-        # Retrieve patch dimensions
-        p = self.predict_data[0]
-        time, lat, lon = p.time.shape[0], p.lat.shape[0], p.lon.shape[0]
+        if not self.predict_data:
+            return
 
-        def _crop(x):
-            return crop(x, crop_val=self.crop_val)
+        if self._merge is None:
+            # Retrieve patch dimensions
+            p = self.predict_data[0]
+            time, lat, lon = p.time.shape[0], p.lat.shape[0], p.lon.shape[0]
 
-        weight = self.kwargs.get(
-            "weight",
-            build_weight(
-                patch_dims=dict(time=time, lat=lat, lon=lon),
-                dim_weights=dict(time=triang, lat=_crop, lon=_crop),
-            ),
-        )
-        out_var = self.kwargs.get("out_var", "sla")
-        _cround = self.kwargs.get("_cround", dict(lat=3, lon=3))
-        out_coords = self.kwargs["out_coords"]
+            def _crop(x):
+                return crop(x, crop_val=self.crop_val)
 
-        ## TODO: actual stuff
-        for c, nd in _cround.items():
-            out_coords[c] = np.round(out_coords[c], nd)
-        out_coords = xr.Dataset(coords=out_coords)
-        dims_shape = dict(**out_coords.sizes)
+            weight = self.kwargs.get(
+                "weight",
+                build_weight(
+                    patch_dims=dict(time=time, lat=lat, lon=lon),
+                    dim_weights=dict(time=triang, lat=_crop, lon=_crop),
+                ),
+            )
+            _cround = self.kwargs.get("_cround", dict(lat=3, lon=3))
+            out_coords = self.kwargs["out_coords"]
 
-        rec_da = xr.DataArray(
-            np.zeros(list(dims_shape.values())),
-            dims=list(dims_shape.keys()),
-            coords=out_coords.coords,
-        )
+            ## TODO: actual stuff
+            for c, nd in _cround.items():
+                out_coords[c] = np.round(out_coords[c], nd)
+            out_coords = xr.Dataset(coords=out_coords)
+            dims_shape = dict(**out_coords.sizes)
 
-        count_da = xr.zeros_like(rec_da)
-        n_batches = len(self.predict_data)
-        for _ in tqdm.tqdm(range(n_batches)):
+            rec_da = xr.DataArray(
+                np.zeros(list(dims_shape.values())),
+                dims=list(dims_shape.keys()),
+                coords=out_coords.coords,
+            )
+
+            count_da = xr.zeros_like(rec_da)
+            self._merge = dict(
+                weight=weight,
+                _cround=_cround,
+                dims_shape=dims_shape,
+                rec_da=rec_da,
+                count_da=count_da,
+            )
+
+        weight = self._merge["weight"]
+        _cround = self._merge["_cround"]
+        dims_shape = self._merge["dims_shape"]
+        rec_da = self._merge["rec_da"]
+        count_da = self._merge["count_da"]
+
+        while self.predict_data:
             da = self.predict_data.pop(0)
             da = da.assign_coords(
                 **{c: np.round(da[c].values, nd) for c, nd in _cround.items()}
@@ -146,7 +170,21 @@ class LitModel(pl.LightningModule):
             rec_da.loc[da_co] = rec_da.sel(da_co) + wda
             count_da.loc[da_co] = count_da.sel(da_co) + w
 
+    def on_predict_end(self):
+        """
+        Merge the patches
+        """
+        # [CHANGE 4] the merge loop that was here now runs in _merge_pending
+        self._merge_pending()
+        rec_da = self._merge["rec_da"]
+        count_da = self._merge["count_da"]
+        out_var = self.kwargs.get("out_var", "sla")
+
         final_reconstruction = (rec_da / count_da).to_dataset(name=out_var)
+
+        # [CHANGE 5] free the two running-sum arrays before formatting/saving
+        self._merge = None
+        del rec_da, count_da
 
         if self.kwargs.get("save_cropped"):
             final_reconstruction = final_reconstruction.isel(
