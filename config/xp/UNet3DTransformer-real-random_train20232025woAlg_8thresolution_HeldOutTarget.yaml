@@ -35,6 +35,7 @@ model:
   _target_: contrib.glorys12.real_random_heldoutloss.LitUnetReal
   min_tgt_frac: 0.002      # default 0.02; held-out targets are sparser, so skip fewer batches
 
+
 trainer:
   precision: bf16-mixed
   limit_train_batches: 1000       # 250*16 batch_size = same 4000 patches per epoch as before

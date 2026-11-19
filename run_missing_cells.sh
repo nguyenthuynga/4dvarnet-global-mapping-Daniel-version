@@ -76,18 +76,13 @@ ENS_NOISE=0.2
 # ------------------------------------------------------------ checkpoints ---
 O=$REPO/outputs
 
-# #UNet 2D 1/8th resolution kmax 8
-# CKPT_2D="$O/2026-11-05/osse_random_pretrain_Resolution8th_UNet2D_GAPFREEtarget_k2to8-08-06-31/unet-osse-random-UNet2D_GAPFREEtarget_8th/checkpoints/val_mse0p76036-epoch809.ckpt"
-# CFG_2D="$O/2026-11-05/osse_random_pretrain_Resolution8th_UNet2D_GAPFREEtarget_k2to8-08-06-31/.hydra/config.yaml"
 
 #UNet 3D 1/4th resolution kmax 7, training data start from July 2023
 CKPT_3D="$O/2026-11-15/UNet3DTransformer_bs4n4_mixed_OSSEgapfree_OSEheldout_7nadirNSwot_train20232025withoutAlg-18-30-25/UNet3DTransformer-real-random_train20232025woAlg_heldout_mixOSSE/checkpoints/val_mse3p26594-epoch389.ckpt"
 CFG_3D="$O/2026-11-15/UNet3DTransformer_bs4n4_mixed_OSSEgapfree_OSEheldout_7nadirNSwot_train20232025withoutAlg-18-30-25/.hydra/config.yaml"
 
-
-# #UNet 3D 1/8th resolution kmax 7, training data start from July 2023
-# CKPT_3D_8th="$O/2026-11-09/Resolution8th_UNet3DTransformer_size384_kmax7_real_random_7nadirNSwot_train20232025withoutAlg_FromJuly2023_precisionbf16mixed-15-02-01/UNet3DTransformer-real-random_train20232025woAlg_trainfromJuly2023_8thresolution.yaml/checkpoints/val_mse2p00651-epoch095.ckpt"
-# CFG_3D_8th="$O/2026-11-09/Resolution8th_UNet3DTransformer_size384_kmax7_real_random_7nadirNSwot_train20232025withoutAlg_FromJuly2023_precisionbf16mixed-15-02-01/.hydra/config.yaml"
+CKPT_HO="$O/2026-11-13/UNet3DTransformer_bs8_real_random_7nadirNSwot_train20232025withoutAlg_heldoutTarget-09-31-21/UNet3DTransformer-real-random_train20232025woAlg_LossOnlyOnHeldOutPixels/checkpoints/val_mse3p46611-epoch302.ckpt"
+CFG_HO="$O/2026-11-13/UNet3DTransformer_bs8_real_random_7nadirNSwot_train20232025withoutAlg_heldoutTarget-09-31-21/.hydra/config.yaml"
 
 
 # ------------------------------------------------------- test constellations -
@@ -97,14 +92,16 @@ IN_7NS="$DATA/alongtrack_S7nadirsNswotKarinWithLweRemoved_real_2023-01-01_2025-0
 
 # ------------------------------- the jobs: name|ckpt|cfg|input|patch|norm ---
 # cheapest first, so the first cells arrive early
-UNet3DTransformer-real-random_train20232025woAlg_heldout_mixOSSE
+# UNet3DTransformer-real-random_train20232025woAlg_heldout_mixOSSE
 JOBS=(
   # "Unet2D_Train6nadirs_TestSWOTnSwon|$CKPT_6N|$CFG_6N|$IN_SWSW|$PATCH_2D|self"
   # "Unet2D_Train6nadirs_Test2nadirs|$CKPT_6N|$CFG_6N|$IN_2N|$PATCH_2D|self"
   # "Unet2D_Train6nadirs_Test4nadirs|$CKPT_6N|$CFG_6N|$IN_4N|$PATCH_2D|self"
   # "Unet2D_Train6nadirs_Test6nadirs|$CKPT_6N|$CFG_6N|$IN_6N|$PATCH_2D|self"
   # "Resolution8th_UNet2D_osse_random_k2to8_Test7nadirsNSWOT|$CKPT_2D|$CFG_2D|$IN_7NS|$PATCH_2D|self"
-  "UNet3D_real_random_k2to7_heldout_mixOSSE_Test7nadirsNSWOT|$CKPT_3D|$CFG_3D|$IN_7NS|$PATCH_BIG|self"
+  # "UNet3D_real_random_k2to7_heldout_mixOSSE_Test7nadirsNSWOT|$CKPT_3D|$CFG_3D|$IN_7NS|$PATCH_BIG|self"
+  "UNet3D_real_random_k2to7_heldout_mixOSSE_normtrain_Test7nadirsNSWOT|$CKPT_3D|$CFG_3D|$IN_7NS|$PATCH_BIG|train"
+  "UNet3D_real_random_k2to7_heldout_normtrain_Test7nadirsNSWOT|$CKPT_HO|$CFG_HO|$IN_7NS|$PATCH_BIG|train"
   # "Resolution8th_UNet3D_real_random_k2to7_trainingdatafromJuly2023_Test7nadirsNSWOT|$CKPT_3D_8th|$CFG_3D_8th|$IN_7NS|$PATCH_BIG|self"
 )
 

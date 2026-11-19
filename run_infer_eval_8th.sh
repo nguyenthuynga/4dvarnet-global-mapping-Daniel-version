@@ -48,7 +48,7 @@ USE_TRAIN_NORM=0         # 0: normalise with the input file's mean/std (as in yo
 
 # ------------------------------------------------------------ checkpoint ----
 RUN8="$REPO/outputs/2026-11-15/Resolution8th_UNet3DTransformer_size384_kmax7_real_random_7nadirNSwot_train20232025withoutAlg_precisionbf16mixed_HeldOutTarget-17-17-30"
-CKPT_8TH="$RUN8/UNet3DTransformer-real-random_train20232025woAlg_8thresolution_HeldOutTarget/checkpoints/val_mse3p78371-epoch089.ckpt"
+CKPT_8TH="$RUN8/UNet3DTransformer-real-random_train20232025woAlg_8thresolution_HeldOutTarget/checkpoints/val_mse3p66171-epoch173.ckpt" #val_mse3p78371-epoch089.ckpt"
 CFG_8TH="$RUN8/.hydra/config.yaml"
 
 # ---------------------------------------------------------- test input --------
@@ -56,7 +56,7 @@ IN_7NS_8TH="/SCRATCH/n23nguye/mapping_2023_2025_8th/alongtrack_S7nadirsNswotKari
 
 # --------------------------------------------- the jobs: name|ckpt|cfg|input --
 JOBS=(
-  "Resolution8th_UNet3DTransformer_size384_kmax7_real_random_7nadirNSwot_train20232025withoutAlg_precisionbf16mixed_HeldOutTarget_Test7nadirsNSWOT|$CKPT_8TH|$CFG_8TH|$IN_7NS_8TH"
+  "Resolution8th_UNet3DTransformer_size384_kmax7_real_random_7nadirNSwot_train20232025withoutAlg_precisionbf16mixed_HeldOutTarget_Epoch173_Test7nadirsNSWOT|$CKPT_8TH|$CFG_8TH|$IN_7NS_8TH"
 )
 
 # =============================================================================

@@ -1,0 +1,8 @@
+/var/spool/slurm/slurmd/job77474/slurm_script: ligne 120: conda : commande introuvable
+/var/spool/slurm/slurmd/job77474/slurm_script: ligne 120: /etc/profile.d/conda.sh: Aucun fichier ou dossier de ce nom
+==========================================================
+ filling 2 table cells (filter: normtrain)   mar. 17 nov. 2026 16:38:47 CET
+==========================================================
+norm=train jobs need the inferring.py from finetune_v2.patch (it has no 'norm' option yet).
+
+Fix the problems listed above before running. Aborting.

@@ -1,0 +1,11 @@
+# @package _global_
+# Continue the interrupted 1/8° run from its checkpoint, with the train period
+xpname: Resolution8th_UNet3DTransformer_size384_kmax7_real_random_7nadirNSwot_train20232025withoutAlg_precisionbf16mixed_HeldOutTarget_Resume
+
+defaults:
+  - UNet3DTransformer-real-random_train20232025woAlg_8thresolution_HeldOutTarget
+  - _self_
+
+# Lightning restores the weights, the optimizer, the LR schedule and the epoch counter from this file.
+# If the same folder has a last.ckpt, it is more recent (epoch 173) and can be used instead.
+ckpt: /Odyssey/private/n23nguye/4dvarnet-global-mapping-Daniel-version/outputs/2026-11-15/Resolution8th_UNet3DTransformer_size384_kmax7_real_random_7nadirNSwot_train20232025withoutAlg_precisionbf16mixed_HeldOutTarget-17-17-30/UNet3DTransformer-real-random_train20232025woAlg_8thresolution_HeldOutTarget/checkpoints/val_mse3p66171-epoch173.ckpt
